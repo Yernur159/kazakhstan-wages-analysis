@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Зарплаты в Казахстане</title>
+<meta name="description" content="Средняя номинальная и реальная зарплата в Казахстане по регионам и отраслям, 2012–2025. Данные БНС АСПиР РК.">
+<style>
+:root{
+  color-scheme:light;
+  --page:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;
+  --grid:#e1e0d9;--axis:#c3c2b7;--border:rgba(11,11,11,.10);
+  --s1:#2a78d6;--s2:#eb6834;--neg:#e34948;--neutral:#c3c2b7;--up:#006300;--down:#b42f2f;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --page:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;
+    --grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);
+    --s1:#3987e5;--s2:#d95926;--neg:#e66767;--neutral:#5a5955;--up:#0ca30c;--down:#e66767;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --page:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;
+  --grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);
+  --s1:#3987e5;--s2:#d95926;--neg:#e66767;--neutral:#5a5955;--up:#0ca30c;--down:#e66767;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 16px 56px}
+header h1{font-size:28px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+header p{margin:0;color:var(--ink2);max-width:760px}
+.meta{font-size:13px;color:var(--muted);margin-top:8px}
+.meta a{color:inherit}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.tile .lbl{font-size:13px;color:var(--ink2)}
+.tile .val{font-size:28px;font-weight:650;margin:2px 0;letter-spacing:-.01em}
+.tile .sub{font-size:13px;color:var(--muted)}
+.tile .neg{color:var(--down)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 18px 12px;margin-bottom:16px}
+.card h2{font-size:17px;margin:0 0 2px}
+.card .note{font-size:13px;color:var(--ink2);margin:0 0 12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:14px;color:var(--ink2)}
+select{font:inherit;color:var(--ink);background:var(--page);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--ink2);margin-bottom:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.box{height:10px;width:10px}
+.chart{position:relative;height:300px}
+.chart.tall{height:640px}
+.chart.mid{height:520px}
+.findings{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:16px}
+.findings h2{font-size:17px;margin:0 0 8px}
+.findings ol{margin:0;padding-left:20px}
+.findings li{margin-bottom:6px}
+details{margin-top:8px;font-size:14px}
+summary{cursor:pointer;color:var(--ink2)}
+.tbl{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;border-bottom:1px solid var(--grid);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--ink2);font-weight:600}
+footer{font-size:13px;color:var(--muted);margin-top:24px}
+footer a{color:inherit}
+@media (max-width:820px){.tiles{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}.chart.tall{height:720px}}
+@media (max-width:420px){.tile .val{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Зарплаты в Казахстане, 2012–2025</h1>
+  <p>Как менялась средняя зарплата по стране, регионам и отраслям — и сколько из этого роста «съела» инфляция.</p>
+  <div class="meta">Данные: Бюро национальной статистики АСПиР РК, <a href="https://taldau.stat.gov.kz/ru/NewIndex/GetIndex/702972">taldau.stat.gov.kz</a> · Анализ: Ернур Есенкелді · <a href="https://github.com/Yernur159/kazakhstan-wages-analysis">код и данные на GitHub</a></div>
+</header>
+
+<section class="tiles" id="tiles"></section>
+
+<section class="findings">
+  <h2>Главные выводы</h2>
+  <ol id="findings"></ol>
+</section>
+
+<section class="card">
+  <h2>Средняя зарплата: страна и выбранный регион</h2>
+  <p class="note">Номинальная среднемесячная зарплата одного работника, ₸</p>
+  <div class="ctrl"><label for="regSel">Регион:</label><select id="regSel"></select></div>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Казахстан</span><span><i style="background:var(--s2)"></i><span id="regName"></span></span></div>
+  <div class="chart"><canvas id="cTrend" aria-label="Линейный график средней зарплаты"></canvas></div>
+</section>
+
+<div class="row">
+<section class="card">
+  <h2>Реальный рост зарплаты</h2>
+  <p class="note">Индекс реальной зарплаты к прошлому году, %. Выше 100 — зарплата обгоняет инфляцию.</p>
+  <div class="legend"><span><i class="box" style="background:var(--s1)"></i>Рост</span><span><i class="box" style="background:var(--neg)"></i>Падение</span></div>
+  <div class="chart"><canvas id="cReal" aria-label="Столбчатый график индекса реальной зарплаты"></canvas></div>
+  <p class="note" style="margin-top:8px">За 2020 год БНС не публикует годовой индекс в этой таблице.</p>
+</section>
+<section class="card">
+  <h2>Разрыв между регионами</h2>
+  <p class="note">Во сколько раз самый «богатый» регион опережает самый «бедный» по средней зарплате</p>
+  <div class="chart"><canvas id="cGap" aria-label="График разрыва между регионами"></canvas></div>
+  <p class="note" style="margin-top:8px">С 2018 г. в статистике есть Шымкент и Туркестанская обл., с 2022 г. — области Абай, Жетісу и Ұлытау.</p>
+</section>
+</div>
+
+<section class="card">
+  <h2>Регионы в 2025 году</h2>
+  <p class="note">Отклонение средней зарплаты региона от средней по Казахстану (<span id="kzAvg"></span>), %</p>
+  <div class="legend"><span><i class="box" style="background:var(--s1)"></i>Выше средней</span><span><i class="box" style="background:var(--neutral)"></i>Ниже средней</span></div>
+  <div class="chart tall"><canvas id="cReg" aria-label="Регионы: отклонение от средней"></canvas></div>
+  <details><summary>Таблица по регионам</summary><div class="tbl" id="tReg"></div></details>
+</section>
+
+<section class="card">
+  <h2>Отрасли: уровень 2025 и рост за 10 лет</h2>
+  <p class="note">Средняя зарплата в 2025 г., ₸. В подсказке — рост с 2015 г.</p>
+  <div class="ctrl"><label for="secSort">Сортировка:</label><select id="secSort"><option value="lvl">по зарплате 2025</option><option value="gr">по росту с 2015</option></select></div>
+  <div class="chart mid"><canvas id="cSec" aria-label="Отрасли: средняя зарплата"></canvas></div>
+  <details><summary>Таблица по отраслям</summary><div class="tbl" id="tSec"></div></details>
+</section>
+
+<footer>
+  Методика: номинальные зарплаты — показатель «Среднемесячная номинальная заработная плата одного работника» (индекс 702972), реальная — «Индекс реальной заработной платы» (индекс 702976), годовые значения. Отклонения и темпы роста посчитаны в Python (pandas). Южно-Казахстанская область (до 2018 г.) не показана: в 2018 г. она разделена на Туркестанскую область и г. Шымкент.
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const D={"years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "kz": [101263, 109141, 121021, 126021, 142898, 150827, 162673, 186815, 213003, 250311, 309697, 364295, 405416, 443315], "regions": {"Абай": [null, null, null, null, null, null, null, null, null, null, 258941, 299142, 339299, 377347], "Акмолинская": [74685, 79127, 85412, 89176, 104816, 110776, 121361, 140272, 168302, 203006, 250155, 300747, 329732, 374100], "Актюбинская": [90241, 96575, 106265, 106778, 117446, 126640, 137039, 156595, 182923, 217597, 274401, 328927, 378086, 404557], "Алматинская": [77320, 81596, 89283, 90445, 104903, 110387, 115101, 136212, 168313, 207592, 261228, 295130, 328536, 364181], "Атырауская": [180406, 192356, 221664, 225121, 268441, 264597, 293572, 351103, 367799, 406166, 523210, 607635, 633322, 613062], "Восточно-Казахстанская": [84872, 90263, 99130, 103028, 118736, 125911, 140126, 162182, 190287, 224700, 287063, 339854, 380325, 416781], "Жамбылская": [72296, 76742, 81874, 85298, 96044, 100536, 109420, 127043, 156846, 195922, 234526, 269125, 299972, 327401], "Жетісу": [null, null, null, null, null, null, null, null, null, null, 229760, 269378, 293160, 332203], "Западно-Казахстанская": [90728, 98360, 108223, 116798, 136675, 144175, 153782, 183914, 195410, 226537, 276191, 316338, 350965, 370882], "Карагандинская": [92382, 99339, 107821, 113905, 125705, 134494, 149916, 172239, 203806, 240608, 283803, 338450, 380953, 423278], "Костанайская": [76647, 83451, 90602, 93560, 107997, 116640, 125995, 145890, 171319, 201923, 250943, 302598, 343804, 384256], "Кызылординская": [93361, 98813, 104485, 106332, 118963, 124107, 130391, 152085, 178174, 212777, 265738, 313493, 344381, 370513], "Мангистауская": [157358, 183914, 222294, 234007, 250787, 259672, 275679, 294099, 317611, 349503, 459953, 535156, 580946, 623059], "Павлодарская": [85844, 93639, 102310, 108630, 122633, 131709, 141915, 160670, 187427, 220291, 273505, 330078, 372615, 417941], "Северо-Казахстанская": [68921, 74853, 81062, 84324, 97344, 104139, 110686, 130233, 157497, 187501, 227021, 262248, 293421, 326679], "Туркестанская": [null, null, null, null, null, null, 104136, 123853, 158762, 195302, 237189, 270660, 295251, 318990], "г. Алматы": [134378, 142310, 155242, 161845, 178678, 190875, 200919, 224158, 247951, 295985, 354860, 426273, 490963, 556063], "г. Астана": [148287, 159537, 177809, 189970, 212848, 227003, 240320, 266796, 302504, 344691, 406920, 480449, 538009, 594164], "г. Шымкент": [null, null, null, null, null, null, 115574, 136995, 161329, 193682, 234729, 275659, 312536, 343876], "Ұлытау": [null, null, null, null, null, null, null, null, null, null, 402561, 483812, 533562, 586978]}, "sectors": {"Административные услуги": [97132, 101019, 94895, 102180, 115041, 151771, 187532, 231360, 220253, 243518, 308465, 362858, 369772, 364301], "Гостиницы и общепит": [82012, 92008, 104410, 116503, 127837, 140070, 149040, 156503, 184065, 206349, 272811, 313650, 341277, 356448], "Госуправление и оборона": [98293, 103467, 106000, 107924, 118868, 125247, 134835, 157152, 185666, 208859, 263843, 313769, 338637, 370822], "Здравоохранение и соцуслуги": [78011, 80993, 88779, 91902, 106049, 108714, 111802, 133499, 175484, 227618, 249834, 292730, 315409, 334195], "Информация и связь": [143960, 156037, 173887, 180828, 204192, 221748, 235410, 262261, 291254, 340545, 436980, 588205, 726771, 834522], "Искусство и развлечения": [74177, 80550, 91713, 95210, 110320, 119164, 127685, 149241, 162480, 160499, 185040, 226631, 270487, 308324], "Недвижимость": [88725, 100091, 108066, 109318, 123346, 147620, 157342, 166223, 183468, 188520, 228393, 265125, 323068, 356643], "Образование": [67931, 69484, 74756, 77542, 94542, 96612, 102875, 126132, 165292, 205183, 248575, 281991, 303020, 322678], "Промышленность": [121788, 138933, 159839, 174436, 195295, 214189, 234168, 260538, 285521, 327090, 418811, 496733, 569617, 638696], "Профессиональная и научная деятельность": [199494, 211562, 250816, 255216, 323661, 268664, 286839, 331287, 342408, 378797, 458832, 517028, 597883, 656257], "Прочие услуги": [150542, 151643, 160392, 202769, 218893, 210924, 209469, 218738, 226625, 248249, 292656, 329901, 361272, 405176], "Сельское хозяйство": [51045, 58304, 66483, 72507, 81572, 91084, 97929, 115371, 130178, 150705, 190086, 222532, 263517, 320808], "Строительство": [111890, 119298, 140321, 154794, 179205, 194227, 213784, 243293, 252504, 300887, 416940, 477821, 508363, 515935], "Торговля": [95084, 103362, 117186, 121020, 131091, 145698, 159091, 175387, 186243, 217783, 268469, 319218, 365157, 417100], "Транспорт и складирование": [129473, 141721, 160007, 166057, 176825, 193579, 210822, 229848, 252955, 292124, 383917, 465666, 532098, 606895], "Финансы и страхование": [191005, 205645, 220803, 236689, 284330, 298725, 334269, 368339, 387471, 465580, 560459, 690772, 856213, 920985]}, "real": {"2013": 101.9, "2014": 103.9, "2015": 97.7, "2016": 98.9, "2017": 98.3, "2018": 101.7, "2019": 109.1, "2021": 108.8, "2022": 107.6, "2023": 102.7, "2024": 102.4, "2025": 98.2}, "nominal": {"2013": 107.8, "2014": 110.9, "2015": 104.1, "2016": 113.4, "2017": 105.5, "2018": 107.9, "2019": 114.8, "2020": 114.0, "2021": 117.5, "2022": 123.7, "2023": 117.6, "2024": 111.3, "2025": 109.3}};
+const Y=D.years, last=Y.length-1, i15=Y.indexOf(2015);
+const fmt=n=>n==null?'—':Math.round(n).toLocaleString('ru-RU').replace(/,/g,' ');
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const pct=(a,b)=>(a/b-1)*100;
+const sgn=x=>(x>0?'+':x<0?'−':'')+Math.abs(x).toFixed(1).replace('.',',');
+
+// ---- derived numbers
+const kz=D.kz, kz25=kz[last];
+const regs=Object.entries(D.regions);
+const reg25=regs.map(([k,v])=>({k,v:v[last],d:pct(v[last],kz25)})).sort((a,b)=>b.v-a.v);
+const above=reg25.filter(r=>r.d>0);
+const gap=Y.map((y,i)=>{const vals=regs.map(([,v])=>v[i]).filter(x=>x);return Math.max(...vals)/Math.min(...vals)});
+const realYears=Object.keys(D.real).map(Number);
+let cumReal=1; realYears.filter(y=>y>=2016).forEach(y=>cumReal*=D.real[y]/100);
+const sec=Object.entries(D.sectors).map(([k,v])=>({k,v:v[last],g:pct(v[last],v[i15])}));
+const secTop=[...sec].sort((a,b)=>b.v-a.v);
+const secGr=[...sec].sort((a,b)=>b.g-a.g);
+
+// ---- tiles
+const T=[
+ ['Средняя зарплата, 2025',fmt(kz25)+' ₸','в '+(kz25/kz[i15]).toFixed(1).replace('.',',')+' раза выше, чем в 2015'],
+ ['Реальный рост в 2025',`<span class="neg">${sgn(D.real[2025]-100)}%</span>`,'зарплата отстала от инфляции'],
+ ['Регионов выше средней',above.length+' из '+reg25.length,'остальные — ниже средней по стране'],
+ ['Разрыв регионов, 2025',gap[last].toFixed(2).replace('.',',')+'×','в 2018 было '+gap[Y.indexOf(2018)].toFixed(2).replace('.',',')+'×'],
+];
+document.getElementById('tiles').innerHTML=T.map(t=>`<div class="tile"><div class="lbl">${t[0]}</div><div class="val">${t[1]}</div><div class="sub">${t[2]}</div></div>`).join('');
+document.getElementById('kzAvg').textContent=fmt(kz25)+' ₸';
+
+// ---- findings
+const F=[
+ `За 10 лет (2015→2025) номинальная средняя зарплата выросла с ${fmt(kz[i15])} до ${fmt(kz25)} ₸ — в ${(kz25/kz[i15]).toFixed(1).replace('.',',')} раза. Но в реальном выражении (с учётом инфляции) рост за 2016–2025 без 2020 г. составил около ${Math.round((cumReal-1)*100)}%.`,
+ `В 2025 году реальная зарплата <b>снизилась на ${(100-D.real[2025]).toFixed(1).replace('.',',')}%</b> — впервые с 2017 г. цены росли быстрее зарплат. Самый сильный реальный рост был в 2019 и 2021 гг. (+9,1% и +8,8%).`,
+ `Средняя по стране выше, чем у большинства регионов: только ${above.length} из ${reg25.length} (${above.map(r=>r.k.replace('г. ','')).join(', ')}) получают больше. Среднюю «тянут вверх» нефтяные регионы и два крупнейших города.`,
+ `Разрыв между регионами сокращается: в 2018 г. лидер опережал аутсайдера в ${gap[Y.indexOf(2018)].toFixed(2).replace('.',',')} раза, в 2025 — в ${gap[last].toFixed(2).replace('.',',')}. С 2018 г. быстрее всего росли Алматинская, Акмолинская и Туркестанская области (примерно ×3), медленнее всего — нефтяная Атырауская (+109%).`,
+ `Самые высокие зарплаты — в отраслях «${secTop[0].k}» (${fmt(secTop[0].v)} ₸) и «${secTop[1].k}» (${fmt(secTop[1].v)} ₸). Быстрее всех с 2015 г. росла «${secGr[0].k}» (+${Math.round(secGr[0].g)}%); самые низкие — образование, искусство и сельское хозяйство.`,
+];
+document.getElementById('findings').innerHTML=F.map(f=>`<li>${f}</li>`).join('');
+
+// ---- chart defaults
+Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+Chart.defaults.font.size=12;
+const charts=[];
+function theme(){
+  Chart.defaults.color=css('--muted');
+  Chart.defaults.borderColor=css('--grid');
+}
+const tip=()=>({backgroundColor:css('--surface'),titleColor:css('--ink'),bodyColor:css('--ink2'),borderColor:css('--border'),borderWidth:1,padding:10,displayColors:true,boxWidth:10,boxHeight:10,boxPadding:4});
+const axisY=(cb)=>({grid:{color:css('--grid'),drawTicks:false},border:{display:false},ticks:{padding:6,callback:cb}});
+const axisX=()=>({grid:{display:false},border:{color:css('--axis')},ticks:{padding:4}});
+
+// ---- region select
+const sel=document.getElementById('regSel');
+regs.map(r=>r[0]).sort((a,b)=>a.localeCompare(b,'ru')).forEach(k=>sel.add(new Option(k,k,false,k==='г. Астана')));
+sel.value='г. Астана';
+
+function build(){
+  theme(); charts.forEach(c=>c.destroy()); charts.length=0;
+  const s1=css('--s1'),s2=css('--s2'),neg=css('--neg'),neu=css('--neutral'),surf=css('--surface');
+  // trend
+  const r=sel.value; document.getElementById('regName').textContent=r;
+  charts.push(new Chart(document.getElementById('cTrend'),{type:'line',
+    data:{labels:Y,datasets:[
+      {label:'Казахстан',data:kz,borderColor:s1,backgroundColor:s1,borderWidth:2,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:surf,pointHoverBorderWidth:2,tension:.2},
+      {label:r,data:D.regions[r],borderColor:s2,backgroundColor:s2,borderWidth:2,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:surf,pointHoverBorderWidth:2,tension:.2,spanGaps:false}]},
+    options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{...tip(),callbacks:{label:c=>' '+c.dataset.label+': '+fmt(c.parsed.y)+' ₸'}}},
+      scales:{x:axisX(),y:{...axisY(v=>(v/1000)+' тыс'),beginAtZero:true}}}}));
+  // real
+  const ry=realYears;
+  charts.push(new Chart(document.getElementById('cReal'),{type:'bar',
+    data:{labels:ry,datasets:[{label:'Реальный рост',data:ry.map(y=>+(D.real[y]-100).toFixed(1)),backgroundColor:ry.map(y=>D.real[y]>=100?s1:neg),borderRadius:4,borderSkipped:false,maxBarThickness:28}]},
+    options:{maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tip(),displayColors:false,callbacks:{label:c=>'Индекс: '+D.real[c.label].toFixed(1).replace('.',',')+'% ('+sgn(c.parsed.y)+'%)'}}},
+      scales:{x:axisX(),y:axisY(v=>(v>0?'+':'')+v+'%')}}}));
+  // gap
+  charts.push(new Chart(document.getElementById('cGap'),{type:'line',
+    data:{labels:Y,datasets:[{label:'Разрыв',data:gap.map(g=>+g.toFixed(2)),borderColor:s1,backgroundColor:s1,borderWidth:2,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:surf,pointHoverBorderWidth:2,tension:.2}]},
+    options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{...tip(),displayColors:false,callbacks:{label:c=>{const i=c.dataIndex,vals=regs.map(([k,v])=>[k,v[i]]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);return [String(c.parsed.y).replace('.',',')+'×',vals[0][0]+': '+fmt(vals[0][1])+' ₸',vals[vals.length-1][0]+': '+fmt(vals[vals.length-1][1])+' ₸']}}}},
+      scales:{x:axisX(),y:{...axisY(v=>v.toFixed(1).replace('.',',')+'×'),min:1.5}}}}));
+  // regions
+  charts.push(new Chart(document.getElementById('cReg'),{type:'bar',
+    data:{labels:reg25.map(r=>r.k),datasets:[{data:reg25.map(r=>+r.d.toFixed(1)),backgroundColor:reg25.map(r=>r.d>0?s1:neu),borderRadius:4,borderSkipped:false,barPercentage:.75}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tip(),displayColors:false,callbacks:{label:c=>[fmt(reg25[c.dataIndex].v)+' ₸',sgn(c.parsed.x)+'% к средней']}}},
+      scales:{y:{grid:{display:false},border:{color:css('--axis')},ticks:{color:css('--ink2')}},x:{...axisY(v=>(v>0?'+':'')+v+'%')}}}}));
+  // sectors
+  const order=document.getElementById('secSort').value==='gr'?secGr:secTop;
+  const gr=document.getElementById('secSort').value==='gr';
+  charts.push(new Chart(document.getElementById('cSec'),{type:'bar',
+    data:{labels:order.map(s=>s.k),datasets:[{data:order.map(s=>gr?Math.round(s.g):s.v),backgroundColor:s1,borderRadius:4,borderSkipped:false,barPercentage:.75}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{...tip(),displayColors:false,callbacks:{label:c=>{const s=order[c.dataIndex];return [fmt(s.v)+' ₸ в 2025','+'+Math.round(s.g)+'% с 2015']}}}},
+      scales:{y:{grid:{display:false},border:{color:css('--axis')},ticks:{color:css('--ink2')}},x:axisY(v=>gr?'+'+v+'%':(v/1000)+' тыс')}}}));
+}
+sel.addEventListener('change',build);
+document.getElementById('secSort').addEventListener('change',build);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
+new MutationObserver(build).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+build();
+
+// ---- tables
+const yrs=[2015,2020,2024,2025];
+document.getElementById('tReg').innerHTML='<table><tr><th>Регион</th>'+yrs.map(y=>`<th>${y}</th>`).join('')+'<th>к средней, %</th></tr>'+
+  reg25.map(r=>'<tr><td>'+r.k+'</td>'+yrs.map(y=>`<td>${fmt(D.regions[r.k][Y.indexOf(y)])}</td>`).join('')+`<td>${sgn(r.d)}</td></tr>`).join('')+
+  '<tr><td><b>Казахстан</b></td>'+yrs.map(y=>`<td><b>${fmt(kz[Y.indexOf(y)])}</b></td>`).join('')+'<td>—</td></tr></table>';
+document.getElementById('tSec').innerHTML='<table><tr><th>Отрасль</th><th>2015</th><th>2025</th><th>Рост, %</th></tr>'+
+  secTop.map(s=>`<tr><td>${s.k}</td><td>${fmt(D.sectors[s.k][i15])}</td><td>${fmt(s.v)}</td><td>+${Math.round(s.g)}</td></tr>`).join('')+'</table>';
+</script>
+</body>
+</html>
